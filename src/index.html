@@ -1,0 +1,12 @@
+{% extends "src/layouts/default.html" %}
+
+{% block content %}
+<ul class="apps">
+  {% for app in apps %}
+    <li class="app" data-manifest="{{ app.manifest }}">
+      <img class="icon" src="{{ app.icon }}" width="128" height="128">
+      <span class="name">{{ app.name }}</span>
+    </li>
+  {% endfor %}
+</ul>
+{% endblock %}
