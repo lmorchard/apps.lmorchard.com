@@ -36,7 +36,8 @@ function init () {
 
   $('.appDetailView button.launch').on('click', function (ev) {
     var manifest = $$('.appDetailView').getAttribute('data-manifest');
-    alert("LAUNCH! " + manifest);
+    var app = appsByManifest[manifest];
+    window.open(app.baseUrl + app.launch_path);
   });
 
   $('.appDetailView button.install').on('click', function (ev) {
