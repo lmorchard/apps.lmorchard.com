@@ -4,7 +4,7 @@
 <ul class="apps">
   {% for app in apps %}
     <li class="app" data-manifest="{{ app.manifest }}">
-      <img class="icon" src="{{ app.icon }}" width="128" height="128">
+      <img class="icon" src="{% if not app.icon %}/img/default-icon.svg{% else %}{{ app.icon }}{% endif %}">
       <span class="name">{{ app.name }}</span>
     </li>
   {% endfor %}

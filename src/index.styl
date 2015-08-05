@@ -1,15 +1,37 @@
 html, body {
   height: 100%;
-  margin: 0;
-  body: 0;
+  margin: 0; padding: 0;
 }
+
 body {
   font: 13px sans-serif;
+
+  header {
+    position: fixed;
+    top: 0;
+    width: 100%;
+    height: 50px;
+    background: #ddd;
+    box-shadow: 0 2px 8px #000;
+
+    h1 {
+      margin: 0; padding: 0;
+      text-align: center;
+      font-size: 1.5em;
+      line-height: 50px;
+    }
+
+  }
+
 }
 
 .apps {
-  margin: 0; padding: 0;
+  margin: 0;
+  padding: 50px 0 0 0;
   list-style-type: none;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
   justify-content: flex-start;
   align-items: stretch;
   align-content: stretch;
@@ -17,10 +39,9 @@ body {
   .app {
     flex-grow: 1;
     float: left;
+    padding: 1em 0 1em 0;
     margin: 0.25em;
     width: 128px;
-    height: 200px;
-    border: 1px solid #000;
     text-align: center;
 
     .icon {
@@ -29,9 +50,11 @@ body {
     }
 
     .name {
-      padding: 0.125em;
+      font-size: 1.125em;
+      padding: 0.25em;
       display: block;
     }
 
   }
+
 }

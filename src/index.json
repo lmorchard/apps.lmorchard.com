@@ -1,0 +1,9 @@
+[
+  { "manifest": "http://stop-it.apps.lmorchard.com/manifest.webapp" },
+  { "manifest": "https://lmorchard.github.io/c25k-web/manifest.webapp" },
+  { "manifest": "https://lmorchard.github.io/fxos-addon-quick-brightness/manifest.webapp" },
+  { "manifest": "https://lmorchard.github.io/fxos-addon-messages-bigger-send-button/manifest.webapp" },
+  { "manifest": "https://lmorchard.github.io/fxos-addon-messages-enter-to-send/manifest.webapp" },
+  { "manifest": "https://lmorchard.github.io/fxos-addon-messages-smaller-message-font/manifest.webapp" },
+  { "manifest": "https://lmorchard.github.io/fxos-addon-quartz-full-story-fix/manifest.webapp" }
+]

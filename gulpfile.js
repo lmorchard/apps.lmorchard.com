@@ -19,17 +19,6 @@ var stream = require('stream');
 var through = require('through2');
 var nunjucks = require('nunjucks');
 
-// TODO: Put this in external config file
-var apps = [
-  { manifest: 'http://stop-it.apps.lmorchard.com/manifest.webapp' },
-  { manifest: 'https://lmorchard.github.io/c25k-web/manifest.webapp' },
-  { manifest: 'https://lmorchard.github.io/fxos-addon-quick-brightness/manifest.webapp' },
-  { manifest: 'https://lmorchard.github.io/fxos-addon-messages-bigger-send-button/manifest.webapp' },
-  { manifest: 'https://lmorchard.github.io/fxos-addon-messages-enter-to-send/manifest.webapp' },
-  { manifest: 'https://lmorchard.github.io/fxos-addon-messages-smaller-message-font/manifest.webapp' },
-  { manifest: 'https://lmorchard.github.io/fxos-addon-quartz-full-story-fix/manifest.webapp' }
-];
-
 nunjucks.configure({ watch: false });
 
 gulp.task('build', [
@@ -59,29 +48,25 @@ gulp.task('stylus', function () {
     .pipe(connect.reload());
 });
 
+function filterApp (app, response, data) {
+  var out = _.assign({}, app, data);
+
+  out.baseUrl = out.manifest.replace('/manifest.webapp', '');
+  out.icon = ('icons' in out && '128' in out.icons) ?
+    (out.baseUrl + out.icons['128']) : false;
+
+  return out;
+}
+
 gulp.task('build:indexes', function () {
+  var apps = JSON.parse(fs.readFileSync('src/index.json'));
   Promise.all(apps.map(function (app) {
     return request({
       url: app.manifest,
       json: true
     }).then(function (results) {
-
-      var data = results[1];
-      var out = _.assign(app, data);
-
-      var baseUrl = out.baseUrl = out.manifest.replace('/manifest.webapp', '');
-
-      if (out.icons['512']) {
-        out.icon = baseUrl + out.icons['512'];
-      } else if (out.icons['128']) {
-        out.icon = baseUrl + out.icons['128'];
-      } else {
-        out.icon = '/img/rocket.png';
-      }
-
-      return out;
-
-    })
+      return filterApp(app, results[0], results[1]);
+    });
   })).then(function (apps) {
     var data = JSON.stringify(apps, null, ' ');
     fs.writeFileSync('dist/index.json', data);
@@ -90,7 +75,7 @@ gulp.task('build:indexes', function () {
   });
 });
 
-gulp.task('build:templates', function () {
+gulp.task('build:templates', ['build:indexes'], function () {
 
   var apps = JSON.parse(fs.readFileSync('dist/index.json'));
 
@@ -111,11 +96,13 @@ gulp.task('build:templates', function () {
     .pipe(through.obj(renderTemplate))
     .pipe(gulp.dest('./dist'))
     .pipe(connect.reload());
+
 });
 
 gulp.task('assets', function () {
   return gulp.src([
       './src/manifest.webapp',
+      './src/**/*.svg',
       './src/**/*.png'
     ])
     .pipe(gulp.dest('./dist'))
