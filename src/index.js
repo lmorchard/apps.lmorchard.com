@@ -6,44 +6,56 @@ var appsByManifest = indexBy(apps, 'manifest');
 
 function init () {
 
-  $('header button.back').on('click', function () {
-    $$('.mainApp').className = 'mainApp appsList';
+  var header = document.querySelector('header');
+
+  header.querySelector('button.back').on('click', function () {
+    setView('appsList');
   });
 
-  $('header button.help').on('click', function () {
-    $$('.mainApp').className = 'mainApp help';
+  header.querySelector('button.help').on('click', function () {
+    setView('help');
   });
 
   var apps = document.querySelector('.apps');
-
-  $('.apps').on('click', function (ev) {
+  apps.addEventListener('click', function (ev) {
 
     var target = ev.target;
     if (!target.classList.contains('app')) {
       target = target.parentNode;
     }
+
     var manifest = target.getAttribute('data-manifest');
-
     var app = appsByManifest[manifest];
+    if (!app) { return; }
 
-    $$('.appDetailView').setAttribute('data-manifest', manifest);
-    $$('.appDetailView .name').innerHTML = app.name;
-    $$('.appDetailView .icon').src = app.icon;
-    $$('.appDetailView .description').innerHTML = app.description;
+    fillTemplate(document.querySelector('.appDetailView'), {
+      '*': function (node) {
+        node.setAttribute('data-manifest', manifest);
+        var installButton = node.querySelector('button.install');
+        installButton.disabled = (!navigator.mozApps ||
+          navigator.mozApps.checkInstalled(manifest));
+      },
+      '.icon': function (node) {
+        node.setAttribute('src', app.icon);
+      },
+      '.name': app.name,
+      '.description': app.description
+    });
 
-    $$('.mainApp').className = 'mainApp appDetail';
+    setView('appDetail');
   });
 
-  $('.appDetailView button.launch').on('click', function (ev) {
-    var manifest = $$('.appDetailView').getAttribute('data-manifest');
+  var appDetailView = document.querySelector('.appDetailView');
+
+  appDetailView.querySelector('button.launch').on('click', function (ev) {
+    var manifest = appDetailView.getAttribute('data-manifest');
     var app = appsByManifest[manifest];
     window.open(app.baseUrl + app.launch_path);
   });
 
-  $('.appDetailView button.install').on('click', function (ev) {
-    var manifest = $$('.appDetailView').getAttribute('data-manifest');
+  appDetailView.querySelector('button.install').on('click', function (ev) {
+    var manifest = appDetailView.getAttribute('data-manifest');
     var request = navigator.mozApps.install(manifest);
-    console.log(manifest, request);
     request.onsuccess = function () {
       alert('installed ' + request.result.origin);
       console.log(request.result);
@@ -55,20 +67,20 @@ function init () {
 
 }
 
-// bling.js - https://gist.github.com/paulirish/12fb951a8b893a454b32
-var $ = document.querySelectorAll.bind(document);
-var $$ = document.querySelector.bind(document);
-
-Node.prototype.on = window.on = function (name, fn) {
-  this.addEventListener(name, fn);
+function setView (name) {
+  document.querySelector('.mainApp').className = 'mainApp ' + name;
 }
 
-NodeList.prototype.__proto__ = Array.prototype;
-
-NodeList.prototype.on = NodeList.prototype.addEventListener = function (name, fn) {
-  this.forEach(function (elem, i) {
-    elem.on(name, fn);
+function fillTemplate (node, data) {
+  Object.keys(data).forEach(function (selector) {
+    var target = selector === '*' ? node : node.querySelector(selector);
+    var content = data[selector];
+    if (Object.prototype.toString.call(content) === '[object Function]') {
+      content(target);
+    } else {
+      target.innerHTML = content;
+    }
   });
-}
+};
 
 domready(init);

@@ -1,23 +1,34 @@
-var _ = require('lodash');
 var fs = require('fs');
 var url = require('url');
+var path = require('path');
+var stream = require('stream');
+
+var _ = require('lodash');
+var gulp = require('gulp');
 var browserify = require('browserify');
 var connect = require('gulp-connect');
-var gulp = require('gulp');
-var path = require('path');
 var stylus = require('gulp-stylus');
 var uglify = require('gulp-uglify');
 var source = require('vinyl-source-stream');
-var deploy = require('gulp-gh-pages');
 var babelify = require("babelify");
 var transform = require('vinyl-transform');
 var buffer = require('vinyl-buffer');
-var tap = require('gulp-tap');
 var Promise = require("bluebird");
 var request = Promise.promisify(require("request"));
-var stream = require('stream');
 var through = require('through2');
 var nunjucks = require('nunjucks');
+
+var gulpIf = require('gulp-if');
+var parallelize = require("concurrent-transform");
+var awspublish = require('gulp-awspublish');
+
+var config = require('./config');
+
+var DEPLOY_CONCURRENCY = 32;
+var GZIP_EXTENSIONS = [
+  'html', 'json', 'rss', 'css', 'js',
+  'otf', 'eot', 'svg', 'ttf', 'woff', 'woff2'
+];
 
 nunjucks.configure({ watch: false });
 
@@ -36,7 +47,7 @@ gulp.task('build:browserify', ['build:indexes'], function () {
     .bundle()
     .pipe(source('index.js'))
     .pipe(buffer())
-    .pipe(uglify())
+    //.pipe(uglify())
     .pipe(gulp.dest('./dist'))
     .pipe(connect.reload());
 });
@@ -127,8 +138,16 @@ gulp.task('watch', function () {
 });
 
 gulp.task('deploy', function () {
-  gulp.src('./dist/**/*')
-    .pipe(deploy({}));
+  var isGzippable = function (file) {
+    var ext = file.path.split('.').pop();
+    return GZIP_EXTENSIONS.indexOf(ext) !== -1;
+  };
+  var publisher = awspublish.create(config.aws);
+  return gulp.src('./dist/**')
+    .pipe(parallelize(gulpIf(isGzippable, awspublish.gzip()), DEPLOY_CONCURRENCY))
+    .pipe(parallelize(publisher.publish(), DEPLOY_CONCURRENCY))
+    .pipe(publisher.cache())
+    .pipe(awspublish.reporter());
 });
 
 gulp.task('server', ['build', 'connect', 'watch']);
