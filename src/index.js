@@ -8,11 +8,11 @@ function init () {
 
   var header = document.querySelector('header');
 
-  header.querySelector('button.back').on('click', function () {
+  header.querySelector('button.back').addEventListener('click', function () {
     setView('appsList');
   });
 
-  header.querySelector('button.help').on('click', function () {
+  header.querySelector('button.help').addEventListener('click', function () {
     setView('help');
   });
 
@@ -31,9 +31,6 @@ function init () {
     fillTemplate(document.querySelector('.appDetailView'), {
       '*': function (node) {
         node.setAttribute('data-manifest', manifest);
-        var installButton = node.querySelector('button.install');
-        installButton.disabled = (!navigator.mozApps ||
-          navigator.mozApps.checkInstalled(manifest));
       },
       '.icon': function (node) {
         node.setAttribute('src', app.icon);
@@ -47,13 +44,13 @@ function init () {
 
   var appDetailView = document.querySelector('.appDetailView');
 
-  appDetailView.querySelector('button.launch').on('click', function (ev) {
+  appDetailView.querySelector('button.launch').addEventListener('click', function (ev) {
     var manifest = appDetailView.getAttribute('data-manifest');
     var app = appsByManifest[manifest];
     window.open(app.baseUrl + app.launch_path);
   });
 
-  appDetailView.querySelector('button.install').on('click', function (ev) {
+  appDetailView.querySelector('button.install').addEventListener('click', function (ev) {
     var manifest = appDetailView.getAttribute('data-manifest');
     var request = navigator.mozApps.install(manifest);
     request.onsuccess = function () {
