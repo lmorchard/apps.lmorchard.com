@@ -1,12 +1,29 @@
 {% extends "src/layouts/default.html" %}
 
 {% block content %}
-<ul class="apps">
-  {% for app in apps %}
-    <li class="app" data-manifest="{{ app.manifest }}">
-      <img class="icon" src="{% if not app.icon %}/img/default-icon.svg{% else %}{{ app.icon }}{% endif %}">
-      <span class="name">{{ app.name }}</span>
-    </li>
-  {% endfor %}
-</ul>
+
+  <section class="view appsListView">
+    <ul class="apps">
+      {% for app in apps %}
+        <li class="app" data-manifest="{{ app.manifest }}">
+          <img class="icon" src="{{ app.icon }}">
+          <span class="name">{{ app.name }}</span>
+        </li>
+      {% endfor %}
+    </ul>
+  </section>
+
+  <section class="view appDetailView">
+    <h2 class="name"></h2>
+    <img class="icon" src="">
+    <p class="description"></p>
+    <button class="launch">Launch</button>
+    <button class="install">Install</button>
+  </section>
+
+  <section class="view helpView">
+    <h2>Welcome to my little app store!</h2>
+    <p>This is where I keep my web apps.</p>
+  </section>
+
 {% endblock %}

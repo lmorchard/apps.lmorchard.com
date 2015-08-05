@@ -5,6 +5,9 @@ html, body {
 
 body {
   font: 13px sans-serif;
+}
+
+.mainApp {
 
   header {
     position: fixed;
@@ -21,40 +24,103 @@ body {
       line-height: 50px;
     }
 
+    button {
+      position: absolute;
+      font-weight: bold;
+      border: 0;
+      background: #ddd;
+      line-height: 50px;
+      width: 50px;
+      height: 50px;
+      font-size: 1.5em;
+    }
+
+    button.back {
+      left: 0;
+      top: 0;
+      border-right: 1px solid #666;
+    }
+
+    button.help {
+      right: 0;
+      top: 0;
+      border-left: 1px solid #666;
+    }
+
   }
 
-}
+  .view {
+    display: none;
+    padding: 50px 0 0 0;
+  }
 
-.apps {
-  margin: 0;
-  padding: 50px 0 0 0;
-  list-style-type: none;
-  display: flex;
-  flex-direction: row;
-  flex-wrap: wrap;
-  justify-content: flex-start;
-  align-items: stretch;
-  align-content: stretch;
+  &.appsList {
+    header button.back { display: none; }
+    .appsListView { display: block; }
+  }
+  &.appDetail {
+    .appDetailView { display: block; }
+  }
+  &.help {
+    header button.help { display: none; }
+    .helpView { display: block; }
+  }
 
-  .app {
-    flex-grow: 1;
-    float: left;
-    padding: 1em 0 1em 0;
-    margin: 0.25em;
-    width: 128px;
+  .appsListView {
+
+    .apps {
+      margin: 0; padding: 0;
+      list-style-type: none;
+      display: flex;
+      flex-direction: row;
+      flex-wrap: wrap;
+      justify-content: flex-start;
+      align-items: stretch;
+      align-content: stretch;
+
+      .app {
+        flex-grow: 1;
+        float: left;
+        padding: 1em 0 1em 0;
+        margin: 0.25em;
+        width: 128px;
+        text-align: center;
+
+        .icon {
+          width: 128px;
+          height: 128px;
+        }
+
+        .name {
+          font-size: 1.125em;
+          padding: 0.25em;
+          display: block;
+        }
+
+      }
+
+    }
+
+  }
+
+  .appDetailView {
     text-align: center;
 
+    h2 {
+      margin: 1.5em 0; padding: 0;
+      text-align: center;
+      font-size: 1.75em;
+    }
+
     .icon {
-      width: 128px;
-      height: 128px;
+      width: 256px;
+      height: 256px;
     }
 
-    .name {
-      font-size: 1.125em;
-      padding: 0.25em;
-      display: block;
-    }
+  }
 
+  .helpView {
+    padding: 60px 2em 2em 2em;
   }
 
 }

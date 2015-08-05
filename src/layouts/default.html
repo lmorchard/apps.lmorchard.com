@@ -6,10 +6,14 @@
     <link rel="stylesheet" type="text/css" href="index.css">
   </head>
   <body>
-    <header>
-      <h1>apps.lmorchard.com</h1>
-    </header>
-    {% block content %}{% endblock %}
+    <section class="mainApp appsList">
+      <header>
+        <h1>apps.lmorchard.com</h1>
+        <button class="back">&lt;</button>
+        <button class="help">?</button>
+      </header>
+      {% block content %}{% endblock %}
+    </section>
     <script type="text/javascript" src="index.js"></script>
   </body>
 </html>

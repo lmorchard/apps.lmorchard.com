@@ -22,11 +22,11 @@ var nunjucks = require('nunjucks');
 nunjucks.configure({ watch: false });
 
 gulp.task('build', [
-  'stylus', 'assets', 'browserify-app',
-  'build:indexes', 'build:templates'
+  'build:indexes', 'build:browserify', 'build:assets',
+  'build:stylus', 'build:templates'
 ]);
 
-gulp.task('browserify-app', function () {
+gulp.task('build:browserify', ['build:indexes'], function () {
   return browserify({
       entries: ['./src/index.js'],
       debug: true,
@@ -41,22 +41,50 @@ gulp.task('browserify-app', function () {
     .pipe(connect.reload());
 });
 
-gulp.task('stylus', function () {
+function filterApp (app, response, data) {
+  var out = _.assign({}, app, data);
+  out.baseUrl = out.manifest.replace('/manifest.webapp', '');
+
+  if (_.has(out, 'icons[512]')) {
+    out.icon = out.baseUrl + out.icons[512];
+  } else if (_.has(out, 'icons[256]')) {
+    out.icon = out.baseUrl + out.icons[256];
+  } else if (_.has(out, 'icons[128]')) {
+    out.icon = out.baseUrl + out.icons[128];
+  } else {
+    out.icon = '/img/default-icon.svg';
+  }
+
+  return out;
+}
+
+function renderTemplate (globals) {
+  return function (file, enc, done) {
+    var tmpl = file.contents.toString('utf-8');
+    var locals = _.assign({ }, globals);
+    var rendered = nunjucks.renderString(tmpl, locals);
+    file.contents = new Buffer(rendered);
+    this.push(file);
+    return done();
+  };
+}
+
+gulp.task('build:stylus', function () {
   return gulp.src('./src/**/*.styl')
     .pipe(stylus())
     .pipe(gulp.dest('./dist'))
     .pipe(connect.reload());
 });
 
-function filterApp (app, response, data) {
-  var out = _.assign({}, app, data);
-
-  out.baseUrl = out.manifest.replace('/manifest.webapp', '');
-  out.icon = ('icons' in out && '128' in out.icons) ?
-    (out.baseUrl + out.icons['128']) : false;
-
-  return out;
-}
+gulp.task('build:assets', function () {
+  return gulp.src([
+      './src/manifest.webapp',
+      './src/**/*.svg',
+      './src/**/*.png'
+    ])
+    .pipe(gulp.dest('./dist'))
+    .pipe(connect.reload());
+});
 
 gulp.task('build:indexes', function () {
   var apps = JSON.parse(fs.readFileSync('src/index.json'));
@@ -76,35 +104,12 @@ gulp.task('build:indexes', function () {
 });
 
 gulp.task('build:templates', ['build:indexes'], function () {
-
   var apps = JSON.parse(fs.readFileSync('dist/index.json'));
-
   var globals = {
     apps: apps
   };
-
-  var renderTemplate = function (file, enc, done) {
-    var tmpl = file.contents.toString('utf-8');
-    var locals = _.assign({ }, globals);
-    var rendered = nunjucks.renderString(tmpl, locals);
-    file.contents = new Buffer(rendered);
-    this.push(file);
-    return done();
-  };
-
   return gulp.src('./src/*.html')
-    .pipe(through.obj(renderTemplate))
-    .pipe(gulp.dest('./dist'))
-    .pipe(connect.reload());
-
-});
-
-gulp.task('assets', function () {
-  return gulp.src([
-      './src/manifest.webapp',
-      './src/**/*.svg',
-      './src/**/*.png'
-    ])
+    .pipe(through.obj(renderTemplate(globals)))
     .pipe(gulp.dest('./dist'))
     .pipe(connect.reload());
 });
